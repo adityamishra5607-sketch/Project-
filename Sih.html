@@ -1760,3 +1760,298 @@ function renderStates(){
         };
         statesGrid.appendChild(card);
     });
+
+    
+    // Re-bind hover targets for dynamically generated elements
+    initCursorHover();
+}
+
+renderStates();
+
+document.getElementById("search").addEventListener("input",renderStates);
+document.getElementById("regionFilter").addEventListener("change",renderStates);
+
+/* ==========================================
+   MODAL
+========================================== */
+
+const modal = document.getElementById("stateModal");
+
+function openState(state){
+    document.getElementById("modalImage").src = state.image;
+    document.getElementById("modalName").textContent = state.name;
+    document.getElementById("modalRegion").textContent = state.region.toUpperCase() + " • " + state.capital;
+    document.getElementById("modalDescription").textContent = state.description;
+    document.getElementById("modalPlaces").textContent = state.places;
+    document.getElementById("modalCulture").textContent = state.culture;
+    document.getElementById("modalMusic").textContent = state.musicAndDance;
+    document.getElementById("modalLanguage").innerHTML = state.languagePhrases;
+    document.getElementById("modalFestivals").textContent = state.festivals;
+    document.getElementById("modalFood").textContent = state.food;
+    document.getElementById("modalTourismLink").href = state.tourismWebsite;
+
+    modal.classList.add("active");
+    document.body.style.overflow="hidden";
+}
+
+document.getElementById("closeModal").onclick=closeModal;
+
+modal.addEventListener("click",e=>{
+    if(e.target===modal){
+        closeModal();
+    }
+});
+
+document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){
+        closeModal();
+    }
+});
+
+function closeModal(){
+    modal.classList.remove("active");
+    document.body.style.overflow="";
+}
+
+/* ==========================================
+   LEAFLET INDIA MAP
+========================================== */
+
+const map = L.map("map",{
+    zoomControl:true,
+    minZoom:3,
+    maxZoom:7,
+    scrollWheelZoom:true
+}).setView([22.5,80],4.4);
+
+L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    {
+        attribution:"© OpenStreetMap © CARTO",
+        maxZoom:19
+    }
+).addTo(map);
+
+const geoJSONURL = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson";
+
+/*
+ * The main India-state GeoJSON used above does not contain the two island
+ * Union Territories.  We therefore add dedicated GeoJSON for them.
+ * These are intentionally separate layers so the islands remain visible
+ * and clickable even if the external state dataset omits them.
+ */
+const islandFeatures = [
+    {
+        type:"Feature",
+        properties:{name:"Lakshadweep", group:"lakshadweep"},
+        geometry:{
+            type:"MultiPolygon",
+            coordinates:[
+                [[[73.02,8.05],[73.18,8.10],[73.22,8.28],[73.08,8.38],[72.94,8.28],[73.02,8.05]]],
+                [[[72.15,10.70],[72.27,10.72],[72.34,10.88],[72.23,10.98],[72.10,10.90],[72.15,10.70]]],
+                [[[72.60,10.48],[72.72,10.50],[72.79,10.62],[72.70,10.73],[72.56,10.66],[72.60,10.48]]],
+                [[[72.18,10.78],[72.28,10.80],[72.34,10.90],[72.27,11.00],[72.15,10.96],[72.18,10.78]]],
+                [[[72.70,11.20],[72.84,11.22],[72.90,11.36],[72.80,11.46],[72.67,11.40],[72.70,11.20]]],
+                [[[72.90,11.35],[73.04,11.37],[73.11,11.52],[73.01,11.63],[72.87,11.56],[72.90,11.35]]],
+                [[[72.60,11.68],[72.75,11.70],[72.83,11.86],[72.72,11.97],[72.56,11.90],[72.60,11.68]]]
+            ]
+        }
+    },
+    {
+        type:"Feature",
+        properties:{name:"Andaman and Nicobar Islands", group:"andaman"},
+        geometry:{
+            type:"MultiPolygon",
+            coordinates:[
+                [[[92.52,13.10],[92.67,13.18],[92.76,13.38],[92.66,13.57],[92.49,13.49],[92.43,13.28],[92.52,13.10]]],
+                [[[92.61,12.55],[92.77,12.58],[92.88,12.82],[92.80,13.00],[92.62,12.95],[92.54,12.72],[92.61,12.55]]],
+                [[[92.71,12.05],[92.88,12.09],[92.98,12.34],[92.88,12.50],[92.69,12.43],[92.63,12.22],[92.71,12.05]]],
+                [[[92.73,11.50],[92.92,11.53],[93.04,11.77],[92.96,11.96],[92.76,11.90],[92.66,11.68],[92.73,11.50]]],
+                [[[92.76,10.95],[92.95,10.98],[93.08,11.21],[93.00,11.42],[92.80,11.37],[92.69,11.12],[92.76,10.95]]],
+                [[[92.80,10.35],[93.00,10.40],[93.12,10.63],[93.03,10.83],[92.83,10.78],[92.72,10.54],[92.80,10.35]]],
+                [[[92.82,9.72],[93.02,9.76],[93.14,9.99],[93.06,10.20],[92.86,10.15],[92.75,9.91],[92.82,9.72]]],
+                [[[92.70,9.05],[92.91,9.10],[93.03,9.34],[92.95,9.55],[92.75,9.49],[92.64,9.25],[92.70,9.05]]],
+                [[[92.55,8.48],[92.75,8.53],[92.86,8.76],[92.78,8.96],[92.58,8.90],[92.47,8.67],[92.55,8.48]]],
+                [[[92.52,7.20],[92.70,7.25],[92.82,7.46],[92.74,7.66],[92.55,7.61],[92.44,7.38],[92.52,7.20]]],
+                [[[92.56,6.72],[92.75,6.77],[92.87,6.98],[92.79,7.17],[92.60,7.13],[92.49,6.90],[92.56,6.72]]]
+            ]
+        }
+    }
+];
+
+const islandGeoJSON = {
+    type:"FeatureCollection",
+    features:islandFeatures
+};
+
+const baseStyle = {
+    color:"#ffb04a",
+    weight:1,
+    fillColor:"#c96f25",
+    fillOpacity:.28
+};
+
+function findStateForMapName(name){
+    const normalized = name
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/union territory/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    return states.find(s => {
+        const stateName = s.name.toLowerCase().replace(/&/g, "and");
+        return normalized === stateName ||
+               normalized.includes(stateName) ||
+               stateName.includes(normalized);
+    });
+}
+
+function attachMapInteraction(layer, name){
+    layer.bindTooltip(name, {
+        className:"state-tooltip",
+        sticky:true
+    });
+
+    layer.on({
+        mouseover:function(e){
+            e.target.setStyle({
+                weight:3,
+                color:"#ffd08a",
+                fillColor:"#ff922e",
+                fillOpacity:.72
+            });
+            cursorOutline.classList.add("hover-active");
+        },
+        mouseout:function(e){
+            e.target.setStyle({
+                weight:1,
+                color:"#ffb04a",
+                fillColor:"#c96f25",
+                fillOpacity:.28
+            });
+            cursorOutline.classList.remove("hover-active");
+        },
+        click:function(){
+            const found = findStateForMapName(name);
+            if(found){
+                openState(found);
+            }
+        }
+    });
+}
+
+fetch(geoJSONURL)
+.then(response=>{
+    if(!response.ok) throw new Error("Main India map request failed");
+    return response.json();
+})
+.then(data=>{
+    L.geoJSON(data,{
+        style:()=>({...baseStyle}),
+        onEachFeature:function(feature,layer){
+            const name =
+                feature.properties.ST_NM ||
+                feature.properties.NAME_1 ||
+                feature.properties.st_nm ||
+                feature.properties.name ||
+                "Indian State";
+
+            attachMapInteraction(layer,name);
+        }
+    }).addTo(map);
+
+    /*
+     * Add the islands after the mainland so they are clearly visible and
+     * remain independent clickable map features.
+     */
+    const islandLayer = L.geoJSON(islandGeoJSON,{
+        style:feature=>({
+            ...baseStyle,
+            weight:1.5,
+            fillOpacity:.55
+        }),
+        onEachFeature:function(feature,layer){
+            attachMapInteraction(layer,feature.properties.name);
+        }
+    }).addTo(map);
+
+    // Keep both island groups comfortably inside the initial map view.
+    const allBounds = L.featureGroup([
+        L.geoJSON(data),
+        islandLayer
+    ]).getBounds();
+
+    if(allBounds.isValid()){
+        map.fitBounds(allBounds.pad(0.08), {
+            padding:[20,20],
+            maxZoom:5
+        });
+    }
+})
+.catch(error=>{
+    console.log("India map data could not be loaded:",error);
+
+    // Even if the external mainland GeoJSON fails, the islands still work.
+    L.geoJSON(islandGeoJSON,{
+        style:feature=>({
+            ...baseStyle,
+            weight:1.5,
+            fillOpacity:.55
+        }),
+        onEachFeature:function(feature,layer){
+            attachMapInteraction(layer,feature.properties.name);
+        }
+    }).addTo(map);
+});
+
+/* ==========================================
+   NAVBAR
+========================================== */
+
+window.addEventListener("scroll",()=>{
+    const nav = document.getElementById("navbar");
+    if(window.scrollY>50){
+        nav.classList.add("scrolled");
+    }else{
+        nav.classList.remove("scrolled");
+    }
+});
+
+/* ==========================================
+   LOADER
+========================================== */
+
+window.addEventListener("load",()=>{
+    setTimeout(()=>{
+        document.getElementById("loader").classList.add("hide");
+    },800);
+    initCursorHover();
+});
+
+/* ==========================================
+   SCROLL REVEAL
+========================================== */
+
+const observer = new IntersectionObserver(
+    entries=>{
+        entries.forEach(entry=>{
+            if(entry.isIntersecting){
+                entry.target.style.opacity="1";
+                entry.target.style.transform="translateY(0)";
+            }
+        });
+    },
+    { threshold:.12 }
+);
+
+document.querySelectorAll(".culture-card,.state-card,.experience-item").forEach(el=>{
+    el.style.opacity="0";
+    el.style.transform="translateY(30px)";
+    el.style.transition="opacity .7s ease, transform .7s ease";
+    observer.observe(el);
+});
+
+</script>
+</body>
+</html>
