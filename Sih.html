@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>India — The Living Heritage</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    cursor: none; /* Hide default cursor */
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Poppins,sans-serif;
+    background:#07151b;
+    color:white;
+    overflow-x:hidden;
+}
+
+/* =========================
+   CUSTOM CURSOR
+========================= */
+.cursor-dot, .cursor-outline {
+    position: fixed;
+    top: 0; left: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 99999;
+    pointer-events: none;
+}
+.cursor-dot {
+    width: 6px; height: 6px;
+    background: #ff9d2e;
+}
+.cursor-outline {
+    width: 40px; height: 40px;
+    border: 1px solid rgba(255, 157, 46, 0.5);
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+}
+.cursor-outline.hover-active {
+    width: 60px; height: 60px;
+    background-color: rgba(255, 157, 46, 0.1);
+    border-color: transparent;
+}
+
+/* =========================
+   LOADER
+========================= */
+
+.loader{
+    position:fixed;
+    inset:0;
+    background:#07151b;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+    transition:.8s;
+}
+
+.loader.hide{
+    opacity:0;
+    pointer-events:none;
+}
+
+.loader-content{
+    text-align:center;
+}
+
+.loader-wheel{
+    width:70px;
+    height:70px;
+    border:4px solid rgba(255,255,255,.15);
+    border-top-color:#ff9d2e;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto auto 20px;
+}
+
+.loader h2{
+    font-family:"Cormorant Garamond";
+    font-size:34px;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+nav{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:5000;
+    padding:18px 6%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:linear-gradient(
+        rgba(0,0,0,.65),
+        rgba(0,0,0,0)
+    );
+    transition:.4s;
+}
+
+nav.scrolled{
+    background:rgba(4,15,20,.92);
+    backdrop-filter:blur(18px);
+    box-shadow:0 10px 40px rgba(0,0,0,.25);
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.logo-symbol{
+    width:43px;
+    height:43px;
+    border:2px solid #ffad45;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.logo span{
+    font-family:"Cormorant Garamond";
+    font-size:27px;
+}
+
+.nav-links{
+    display:flex;
+    gap:30px;
+}
+
+.nav-links a{
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+    transition:.3s;
+}
+
+.nav-links a:hover{
+    color:#ffae42;
+}
+
+.menu{
+    display:none;
+    font-size:27px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    min-height:100vh;
+    position:relative;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    background:
+    linear-gradient(
+        90deg,
+        rgba(3,14,19,.9) 0%,
+        rgba(3,14,19,.55) 45%,
+        rgba(3,14,19,.15) 100%
+    ),
+    url("https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=2200&q=90")
+    center/cover;
+}
+
+.hero:after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+    radial-gradient(circle at 80% 50%,rgba(255,151,43,.22),transparent 25%),
+    linear-gradient(transparent 70%,#07151b 100%);
+}
+
+.hero-content{
+    position:relative;
+    z-index:3;
+    max-width:850px;
+    margin-left:8%;
+    animation:heroIn 1.3s ease;
+}
+
+@keyframes heroIn{
+    from{
+        opacity:0;
+        transform:translateY(40px);
+    }
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+.eyebrow{
+    text-transform:uppercase;
+    letter-spacing:5px;
+    color:#ffb35a;
+    font-size:13px;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-family:"Cormorant Garamond";
+    font-size:clamp(65px,9vw,130px);
+    line-height:.78;
+    margin-bottom:30px;
+}
+
+.hero h1 span{
+    color:#ffab3d;
+    text-shadow: 0 0 30px rgba(255, 171, 61, 0.4);
+}
+
+.hero p{
+    max-width:650px;
+    color:#dce4e5;
+    font-size:17px;
+    line-height:1.9;
+}
+
+.hero-buttons{
+    margin-top:35px;
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:14px 27px;
+    border-radius:50px;
+    text-decoration:none;
+    border:1px solid rgba(255,255,255,.25);
+    color:white;
+    cursor:none;
+    transition:.3s;
+    font-family:Poppins;
+    font-size:14px;
+}
+
+.btn.primary{
+    background:linear-gradient(90deg,#ff8e28,#ffb448);
+    color:#111;
+    border:none;
+    font-weight:600;
+}
+
+.btn:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 35px rgba(255,155,55,.3);
+}
+
+/* floating circles */
+
+.orb{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(1px);
+    opacity:.35;
+    animation:float 8s ease-in-out infinite;
+}
+
+.orb1{
+    width:130px;
+    height:130px;
+    background:#ff9a32;
+    right:15%;
+    top:20%;
+}
+
+.orb2{
+    width:80px;
+    height:80px;
+    background:#48b8a0;
+    right:30%;
+    bottom:20%;
+    animation-delay:2s;
+}
+
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-35px)}
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 5;
+}
+
+.scroll-indicator p {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffab42;
+}
+
+.mouse {
+    width: 26px;
+    height: 42px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    position: relative;
+}
+
+.mouse::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 6px;
+    background: #ffab42;
+    border-radius: 50%;
+    animation: scroll 1.5s infinite;
+}
+
+@keyframes scroll {
+    0% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, 15px); opacity: 0; }
+}
+
+/* =========================
+   STATS RIBBON
+========================= */
+
+.stats-ribbon {
+    display: flex;
+    justify-content: space-around;
+    padding: 40px 7%;
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.stat { text-align: center; }
+.stat h3 { font-family: "Cormorant Garamond"; font-size: 42px; color: #ffad45; }
+.stat p { font-size: 13px; color: #aebec2; text-transform: uppercase; letter-spacing: 1px; }
+
+/* =========================
+   INTRO / CULTURE
+========================= */
+
+.section{
+    padding:100px 7%;
+}
+
+.section-title{
+    max-width:800px;
+    margin-bottom:50px;
+}
+
+.section-title small{
+    color:#ffab42;
+    letter-spacing:4px;
+    text-transform:uppercase;
+}
+
+.section-title h2{
+    font-family:"Cormorant Garamond";
+    font-size:60px;
+    line-height:1;
+    margin:12px 0;
+}
+
+.section-title p{
+    color:#aebec2;
+    line-height:1.8;
+}
+
+/* =========================
+   CULTURE CARDS & STATE CARDS (GLASSMORPHISM)
+========================= */
+
+.culture-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+}
+
+.culture-card, .state-card {
+    height:340px;
+    border-radius:24px;
+    overflow:hidden;
+    position:relative;
+    cursor:none;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition:.5s;
+}
+
+.state-card {
+    height:220px;
+    background:#12242a;
+}
+
+.culture-card:hover, .state-card:hover {
+    transform:translateY(-12px) scale(1.02);
+}
+
+.culture-card img, .state-card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.7s;
+}
+
+.culture-card:hover img, .state-card:hover img {
+    transform:scale(1.12);
+}
+
+.culture-card:after, .state-card:after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(
+        to top,
+        rgba(4, 15, 20, 1) 0%,
+        rgba(4, 15, 20, 0.6) 40%,
+        transparent 100%
+    );
+    transition: 0.5s;
+}
+
+.culture-card:hover:after, .state-card:hover:after {
+    background: linear-gradient(
+        to top,
+        rgba(255, 157, 46, 0.9) 0%,
+        rgba(4, 15, 20, 0.8) 50%,
+        transparent 100%
+    );
+}
+
+.card-text, .state-info {
+    position:absolute;
+    z-index:2;
+    bottom:25px;
+    left:25px;
+    right:20px;
+    transform: translateY(20px);
+    opacity: 0.8;
+    transition: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.state-info {
+    bottom:17px;
+    left:18px;
+}
+
+.culture-card:hover .card-text, 
+.state-card:hover .state-info {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.card-text h3{
+    font-family:"Cormorant Garamond";
+    font-size:32px;
+}
+
+.card-text p{
+    font-size:12px;
+    color:#ddd;
+}
+
+.state-info h3{
+    font-family:"Cormorant Garamond";
+    font-size:28px;
+}
+
+.state-info small{
+    color:#ffb35a;
+}
+
+/* =========================
+   MAP
+========================= */
+
+.map-section{
+    background:
+    radial-gradient(
+        circle at 50% 30%,
+        rgba(255,156,53,.1),
+        transparent 40%
+    );
+}
+
+.map-wrapper{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:30px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 30px 100px rgba(0,0,0,.3);
+}
+
+#map{
+    height:680px;
+    width:100%;
+    background:#091920;
+}
+
+.map-overlay{
+    position:absolute;
+    z-index:1000;
+    top:25px;
+    left:25px;
+    padding:18px 22px;
+    border-radius:18px;
+    background:rgba(5,17,22,.88);
+    backdrop-filter:blur(15px);
+    max-width:300px;
+}
+
+.map-overlay h3{
+    font-family:"Cormorant Garamond";
+    font-size:26px;
+}
+
+.map-overlay p{
+    color:#9eb0b4;
+    font-size:12px;
+    line-height:1.6;
+    margin-top:5px;
+}
+
+/* leaflet */
+.leaflet-container{
+    font-family:Poppins;
+}
+
+.state-tooltip{
+    background:#07151b;
+    border:1px solid #ff9f35;
+    color:white;
+    border-radius:10px;
+    padding:6px 10px;
+    font-size:12px;
+}
+
+.state-tooltip:before{
+    display:none;
+}
+
+/* =========================
+   STATE DIRECTORY
+========================= */
+
+.directory{
+    background:#061116;
+}
+
+.search-row{
+    display:flex;
+    gap:15px;
+    margin-bottom:35px;
+    flex-wrap:wrap;
+}
+
+.search{
+    flex:1;
+    min-width:250px;
+    padding:16px 20px;
+    border-radius:50px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    color:white;
+    outline:none;
+    font-family:Poppins;
+    cursor:auto;
+}
+
+.filter{
+    padding:14px 20px;
+    border-radius:50px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#0c2028;
+    color:white;
+    cursor:none;
+}
+
+.states-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+}
+
+/* =========================
+   EXPERIENCE
+========================= */
+
+.experience{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:50px;
+    align-items:center;
+}
+
+.experience-image{
+    height:600px;
+    border-radius:30px;
+    overflow:hidden;
+}
+
+.experience-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.experience-content h2{
+    font-family:"Cormorant Garamond";
+    font-size:64px;
+}
+
+.experience-content p{
+    color:#aebdc0;
+    line-height:1.9;
+    margin:20px 0;
+}
+
+.experience-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:25px;
+}
+
+.experience-item{
+    padding:18px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:15px;
+    background:rgba(255,255,255,.035);
+}
+
+.experience-item b{
+    display:block;
+    margin-bottom:5px;
+}
+
+.experience-item span{
+    color:#94a8ad;
+    font-size:12px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+    padding:60px 7%;
+    border-top:1px solid rgba(255,255,255,.1);
+    display:flex;
+    justify-content:space-between;
+    gap:30px;
+    flex-wrap:wrap;
+}
+
+footer h2{
+    font-family:"Cormorant Garamond";
+    font-size:35px;
+}
+
+footer p{
+    color:#8da0a5;
+    font-size:13px;
+    margin-top:8px;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:9000;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(12px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.modal.active{
+    display:flex;
+}
+
+.modal-box{
+    width:min(1100px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:#0a1b22;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:30px;
+    position:relative;
+    animation:modalIn .45s ease;
+}
+
+@keyframes modalIn{
+    from{
+        opacity:0;
+        transform:scale(.9) translateY(30px);
+    }
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+.modal-hero{
+    height:360px;
+    position:relative;
+}
+
+.modal-hero img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.modal-hero:after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        transparent 30%,
+        #0a1b22
+    );
+}
+
+.modal-title{
+    position:absolute;
+    z-index:2;
+    bottom:35px;
+    left:40px;
+}
+
+.modal-title h2{
+    font-family:"Cormorant Garamond";
+    font-size:65px;
+}
+
+.close{
+    position:absolute;
+    z-index:5;
+    right:20px;
+    top:20px;
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.3);
+    background:rgba(0,0,0,.5);
+    color:white;
+    font-size:20px;
+    cursor:none;
+}
+
+.modal-content{
+    padding:10px 40px 45px;
+}
+
+.modal-intro{
+    color:#aebfc3;
+    line-height:1.9;
+    margin-bottom:30px;
+}
+
+.detail-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:20px;
+}
+
+.detail-box{
+    padding: 24px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: 0.3s ease;
+}
+
+.detail-box:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 174, 67, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.detail-box h4{
+    color:#ffae43;
+    margin-bottom:10px;
+}
+
+.detail-box p{
+    color:#b8c5c8;
+    line-height:1.7;
+    font-size:14px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1000px){
+    .culture-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+    .states-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+    .experience{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:700px){
+    nav{
+        padding:15px 5%;
+    }
+    .nav-links{
+        display:none;
+    }
+    .menu{
+        display:block;
+    }
+    .hero-content{
+        margin:0 7%;
+    }
+    .hero h1{
+        font-size:70px;
+    }
+    .stats-ribbon {
+        flex-direction: column;
+        gap: 25px;
+    }
+    .section{
+        padding:70px 5%;
+    }
+    .section-title h2{
+        font-size:48px;
+    }
+    .culture-grid{
+        grid-template-columns:1fr;
+    }
+    .states-grid{
+        grid-template-columns:1fr;
+    }
+    #map{
+        height:500px;
+    }
+    .map-overlay{
+        display:none;
+    }
+    .experience-image{
+        height:400px;
+    }
+    .experience-content h2{
+        font-size:48px;
+    }
+    .detail-grid{
+        grid-template-columns:1fr;
+    }
+    .modal-title{
+        left:25px;
+    }
+    .modal-title h2{
+        font-size:48px;
+    }
+    .modal-content{
+        padding:10px 25px 30px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-outline" id="cursor-outline"></div>
+
+<!-- LOADER -->
+
+<div class="loader" id="loader">
+    <div class="loader-content">
+        <div class="loader-wheel"></div>
+        <h2>Discovering India...</h2>
+    </div>
+</div>
+
+<!-- NAVIGATION -->
+
+<nav id="navbar">
+    <div class="logo">
+        <div class="logo-symbol">ॐ</div>
+        <span>India • The Living Heritage</span>
+    </div>
+    <div class="nav-links">
+        <a href="#home" class="hover-target">Home</a>
+        <a href="#culture" class="hover-target">Culture</a>
+        <a href="#map-section" class="hover-target">Explore Map</a>
+        <a href="#states" class="hover-target">States</a>
+        <a href="#experiences" class="hover-target">Experiences</a>
+    </div>
+    <div class="menu hover-target">☰</div>
+</nav>
+
+<!-- HERO -->
+
+<section class="hero" id="home">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    
+    <div class="hero-content">
+        <div class="eyebrow">
+            28 States • 8 Union Territories • One Incredible India
+        </div>
+        <h1>
+            The Soul<br>
+            of <span>India</span>
+        </h1>
+        <p>
+            Journey through India's living heritage — from Himalayan
+            monasteries and royal palaces to coastal traditions,
+            ancient temples, colourful festivals and extraordinary food.
+        </p>
+        <div class="hero-buttons">
+            <a href="#map-section" class="btn primary hover-target">
+                Explore India →
+            </a>
+            <a href="#culture" class="btn hover-target">
+                Discover Culture
+            </a>
+        </div>
+    </div>
+    
+    <!-- SCROLL INDICATOR ENHANCEMENT -->
+    <div class="scroll-indicator">
+        <div class="mouse"></div>
+        <p>Scroll to Explore</p>
+    </div>
+</section>
+
+<!-- STATS RIBBON ENHANCEMENT -->
+<div class="stats-ribbon">
+    <div class="stat"><h3>5,000+</h3><p>Years of History</p></div>
+    <div class="stat"><h3>40</h3><p>UNESCO Sites</p></div>
+    <div class="stat"><h3>22</h3><p>Official Languages</p></div>
+    <div class="stat"><h3>8</h3><p>Classical Dances</p></div>
+</div>
+
+<!-- CULTURE -->
+
+<section class="section" id="culture">
+    <div class="section-title">
+        <small>Experience India</small>
+        <h2>
+            A civilisation that<br>
+            never stopped living.
+        </h2>
+        <p>
+            India's culture is expressed through its people, architecture,
+            music, dance, festivals, crafts, food and landscapes.
+        </p>
+    </div>
+
+    <div class="culture-grid">
+        <div class="culture-card hover-target">
+            <img src="https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=1000&q=85">
+            <div class="card-text">
+                <h3>Heritage</h3>
+                <p>Forts • Palaces • Temples • Monuments</p>
+            </div>
+        </div>
+
+        <div class="culture-card hover-target">
+            <img src="https://images.unsplash.com/photo-1514222134-b57cbb8ce073?auto=format&fit=crop&w=1000&q=85">
+            <div class="card-text">
+                <h3>Festivals</h3>
+                <p>Colour • Music • Traditions • Celebration</p>
+            </div>
+        </div>
+
+        <div class="culture-card hover-target">
+            <img src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1000&q=85">
+            <div class="card-text">
+                <h3>Arts & Crafts</h3>
+                <p>Handloom • Sculpture • Painting • Crafts</p>
+            </div>
+        </div>
+
+        <div class="culture-card hover-target">
+            <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1000&q=85">
+            <div class="card-text">
+                <h3>Food</h3>
+                <p>Flavours • Spices • Regional Cuisine</p>
+            </div>
+        </div>
+    <
